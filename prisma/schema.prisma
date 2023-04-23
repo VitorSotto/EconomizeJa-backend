@@ -41,17 +41,17 @@ model Products {
   supplier String?
   market   String
   image    String
-  priceId  Prices?
+  price    Prices  @relation(fields: [priceId], references: [id])
+  priceId  String  @unique
 
-  cart   Cart?   @relation(fields: [cartId], references: [id])
-  cartId String?
+  cart Cart[]
 }
 
 model Prices {
-  id        String   @id
+  id        String    @id
   category  String
   price     Decimal
   updatedAt DateTime
-  product   Products @relation(fields: [productId], references: [id])
-  productId String   @unique
+  product   Products?
+  productId String    @unique
 }

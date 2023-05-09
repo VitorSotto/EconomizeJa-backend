@@ -10,48 +10,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id       String @id
-  name     String
-  email    String
-  password String
-
-  carts Cart[]
-
-  role String @default("USER")
-
-  createdAt DateTime @default(now())
-  deletedAt DateTime
-}
-
-model Cart {
-  id String @id
-
-  products Products[]
-
-  createdAt DateTime @default(now())
-  createdBy User     @relation(fields: [userId], references: [id])
-  userId    String
-}
-
-model Products {
+model Product {
   id String @id
 
   name     String
   supplier String?
   market   String
   image    String
-  price    Prices  @relation(fields: [priceId], references: [id])
   priceId  String  @unique
-
-  cart Cart[]
+  price    Price   @relation(fields: [priceId], references: [id])
 }
 
-model Prices {
-  id        String    @id
+model Price {
+  id        String   @id
   category  String
   price     Decimal
-  updatedAt DateTime
-  product   Products?
-  productId String    @unique
+  updatedAt String
+  productId String   @unique
+  product   Product?
 }

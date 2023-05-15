@@ -6,6 +6,13 @@ export class ProductsService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async findAll() {
-    return this.prismaService.product.findMany({ include: { price: true } });
+    return this.prismaService.price.findMany({ include: { product: true } });
+  }
+
+  async filterByCategory(category: string) {
+    return this.prismaService.price.findMany({
+      include: { product: true },
+      where: { category },
+    });
   }
 }

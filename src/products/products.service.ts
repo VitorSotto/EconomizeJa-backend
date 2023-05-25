@@ -10,9 +10,34 @@ export class ProductsService {
   }
 
   async filterByCategory(category: string) {
-    return this.prismaService.price.findMany({
+    const prices = await this.prismaService.price.findMany({
       include: { product: true },
       where: { category },
     });
+
+    const newPrices = prices.map((pricesItem) => {
+      if (pricesItem.product.name.search(category.concat(' ')) !== -1) {
+        return pricesItem;
+      }
+      if (
+        pricesItem.product.name.search(
+          category
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .concat(' '),
+        ) !== -1
+      ) {
+        return pricesItem;
+      }
+    });
+
+    for (let i = 0; i < newPrices.length; i++) {
+      if (newPrices[i] === null || newPrices[i] === undefined) {
+        newPrices.splice(i, 1);
+        i--;
+      }
+    }
+
+    return newPrices;
   }
 }

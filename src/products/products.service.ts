@@ -9,8 +9,52 @@ export class ProductsService {
     return this.prismaService.price.findMany({ include: { product: true } });
   }
 
-  async filterByCategory(category: string) {
+  async findByPage(page: number) {
+    const pageSize = 12;
+    const skip = (page - 1) * pageSize;
+    const take = pageSize;
+
+    const totalCount = await this.prismaService.price.count();
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    const products = await this.prismaService.price.findMany({
+      skip,
+      take,
+      orderBy: {
+        price: 'asc',
+      },
+      include: {
+        product: true,
+      },
+    });
+
+    return {
+      data: products,
+      page,
+      pageSize,
+      totalCount,
+      totalPages,
+    };
+  }
+
+  async filterByCategory(category: string, page: number) {
+    const pageSize = 12;
+    const skip = (page - 1) * pageSize;
+    const take = 10;
+
+    const totalCount = await this.prismaService.price.count({
+      where: {
+        category,
+      },
+    });
+    const totalPages = Math.ceil(totalCount / pageSize);
+
     const prices = await this.prismaService.price.findMany({
+      skip,
+      take,
+      orderBy: {
+        price: 'asc',
+      },
       include: { product: true },
       where: { category },
     });
@@ -38,6 +82,12 @@ export class ProductsService {
       }
     }
 
-    return newPrices;
+    return {
+      data: newPrices,
+      page,
+      pageSize,
+      totalCount,
+      totalPages,
+    };
   }
 }

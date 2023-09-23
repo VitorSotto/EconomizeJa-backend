@@ -90,4 +90,68 @@ export class ProductsService {
       totalPages,
     };
   }
+
+  async filterBySearch(search: string, page: number) {
+    const pageSize = 12;
+    const skip = (page - 1) * pageSize;
+    const take = 10;
+
+    const totalCount = await this.prismaService.price.count({
+      where: {
+        product: {
+          name: {
+            contains: search,
+          },
+        },
+      },
+    });
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    const prices = await this.prismaService.price.findMany({
+      skip,
+      take,
+      orderBy: {
+        price: 'asc',
+      },
+      include: { product: true },
+      where: {
+        product: {
+          name: {
+            contains: search,
+          },
+        },
+      },
+    });
+
+    const newPrices = prices.map((pricesItem) => {
+      if (pricesItem.product.name.search(search) !== -1) {
+        return pricesItem;
+      }
+      if (
+        pricesItem.product.name.search(
+          search
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .concat(' '),
+        ) !== -1
+      ) {
+        return pricesItem;
+      }
+    });
+
+    for (let i = 0; i < newPrices.length; i++) {
+      if (newPrices[i] === null || newPrices[i] === undefined) {
+        newPrices.splice(i, 1);
+        i--;
+      }
+    }
+
+    return {
+      data: newPrices,
+      page,
+      pageSize,
+      totalCount,
+      totalPages,
+    };
+  }
 }

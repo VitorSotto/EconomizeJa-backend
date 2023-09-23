@@ -15,11 +15,19 @@ export class ProductsController {
     return this.productsService.findByPage(page);
   }
 
-  @Get(':category/:page')
+  @Get('category/:category/:page')
   filterByCategory(
     @Param('category') category: string,
     @Param('page', ParseIntPipe) page: number,
   ) {
     return this.productsService.filterByCategory(category, page);
+  }
+
+  @Get('search/:search/:page')
+  filterBySearch(
+    @Param('search') search: string,
+    @Param('page', ParseIntPipe) page: number,
+  ) {
+    return this.productsService.filterBySearch(search, page);
   }
 }
